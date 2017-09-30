@@ -1,5 +1,6 @@
 {
   "token": "insert-bot-token-here",
   "prefix": "!",
-  "ownerID": "your-user-ID"
+  "ownerID": "your-user-ID",
+  "mongodbHost": "mongodb://localhost/pr_willow"
 }

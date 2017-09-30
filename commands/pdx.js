@@ -1,43 +1,75 @@
-const pokedex = require("../pokedex.json");
+const Pokemon = require("../models/pokemon");
+const config  = require("../config.json");
 
 exports.run = (client, message, args) => {
-  let alias = args.shift().toLowerCase();
-  let pokemon = undefined;
+  let alias = args.shift();
+  if (!alias) return message.channel.send(
+    "Tu dois saisir un identifiant ou un nom, par exemple `" + config.prefix + "pdx abra`."
+  );
 
-  if (alias in pokedex.pokemon) {
-    pokemon = pokedex.pokemon[alias];
-  } else {
-    let BreakException = {};
-    Object.keys(pokedex.pokemon).forEach(function (item) {
-      try {
-        if (
-          pokedex.pokemon[item].id === parseInt(alias) ||
-          pokedex.pokemon[item].locale_name.toLowerCase() === alias ||
-          pokedex.pokemon[item].name.toLowerCase() === alias
-        ) {
-          pokemon = pokedex.pokemon[item];
-          throw BreakException;
-        }
-      } catch (e) {
-        if (e !== BreakException) throw e;
-      }
-    })
-  }
+  alias = alias.toLowerCase();
 
-  if (undefined !== pokemon) {
-    message.channel.send(
-      "**#" + pokemon.id +" " + pokemon.name.toUpperCase() + " - GEN 1** \n" +
-      "Poids : `" + pokemon.weight + "kg` Taille : `" + pokemon.height + "m` \n" +
-      "Type: `Feu` \n" +
-      "**EVOLUTION**: CHARMANDER -> CHARMELEON -> CHARIZARD \n" +
-      "```" + pokemon.description + "``` \n" +
-      "------- \n" +
-      "Coût d'évolution : `25 Charmander bonbons` \n" +
-      "PC max (lvl 20 | 30 | 40) : `" + pokemon.max_cp_20 + "`  | `" + pokemon.max_cp_30 + "` | `" + pokemon.max_cp + "` \n" +
-      "Stats (ATT | DEF | RES) : `" + pokemon.att + "`  | `" + pokemon.def + "` | `" + pokemon.sta + "` \n" +
-      "-------"
+  Pokemon.where({
+    $or: [
+      {"name": alias},
+      {"local_name": alias},
+      {"id": parseInt(alias) || 0}
+    ]
+  }).findOne(function(err, pokemon) {
+    if (err) return console.error(err);
+    if (null === pokemon) return message.channel.send(
+      "Il n'y a aucune entrée dans le Pokédex pour le nom ou l'identifiant `" + alias + "`."
     );
-  } else {
-    message.channel.send("Il n'y a aucune entrée dans le Pokédex pour la valeur `" + alias + "`.");
-  }
+
+    let finalId = ("000" + pokemon.id).substr(pokemon.id.toString().length);
+
+    let informations = "**#" + finalId + " " + pokemon.name.toUpperCase() + " - GEN " + pokemon.generation + "** \n";
+
+    if (pokemon.weight) {
+      informations += "Poids : `" + pokemon.weight + "kg` ";
+    }
+    if (pokemon.height) {
+      informations += "Taille : `" + pokemon.height + "m`";
+    }
+    if (pokemon.weight || pokemon.height) informations += "\n";
+
+    if (pokemon.types.length) {
+      if (pokemon.types.length > 1) {
+        informations += "Types :";
+      } else {
+        informations += "Type :";
+      }
+      pokemon.types.forEach(function (type) {
+        informations += " `" + type + "`";
+      });
+    }
+
+    // "**EVOLUTION**: CHARMANDER -> CHARMELEON -> CHARIZARD \n" +
+
+    if (pokemon.description) {
+      informations += "\n```" + pokemon.description + "```";
+    }
+
+    informations += "-------\n";
+
+    if (pokemon.evolution_cost) {
+      informations += "Coût d'évolution : `" + pokemon.evolution_cost + " bonbons` \n";
+    }
+
+    if (pokemon.hatches_from) {
+      informations += "Eclos d'un oeuf `" + pokemon.hatches_from + "km`\n";
+    }
+
+    if (pokemon.max_cp && pokemon.max_cp_20 && pokemon.max_cp_30) {
+      informations += "PC max (Lvl 20/30/40) : `" +
+        pokemon.max_cp_20 + "`/`" + pokemon.max_cp_30 + "`/`" + pokemon.max_cp + "`\n";
+    }
+
+    if (pokemon.attack && pokemon.defense && pokemon.stamina) {
+      informations += "Statistiques (Att/Def/End) : `" +
+        pokemon.attack + "`/`" + pokemon.defense + "`/`" + pokemon.stamina + "`";
+    }
+
+    return message.channel.send(informations);
+  });
 }
