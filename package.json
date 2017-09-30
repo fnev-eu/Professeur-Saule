@@ -18,6 +18,7 @@
   "homepage": "https://github.com/fnev-eu/Professeur-Willow#readme",
   "dependencies": {
     "discord.js": "^11.2.1",
-    "fs": "0.0.1-security"
+    "fs": "0.0.1-security",
+    "mongoose": "^4.11.13"
   }
 }
