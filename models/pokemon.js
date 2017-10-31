@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const PokemonSchema = mongoose.Schema({
+const PokemonSchema = new Schema({
   id: {type: Number, min: 1, index: {unique: true}},
   name: {type: String, index: {unique: true}},
   local_name: {type: String, index: {unique: true}},
@@ -18,7 +19,7 @@ const PokemonSchema = mongoose.Schema({
   stamina: {type: Number, min: 0},
   evolutions: {type: Array},
   evolution_cost: {type: Number, min: 1},
-  evolution_candy: {type: String},
+  _evolution_candy: {type: Schema.ObjectId, ref: "Pokemon" },
   hatches_from: {type: Number},
   nests: {type: Array}
 });
