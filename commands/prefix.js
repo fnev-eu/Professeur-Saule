@@ -11,4 +11,4 @@ exports.run = (client, message, args) => {
   config.prefix = newPrefix;
   fs.writeFile("./config.json", JSON.stringify(config), (err) => console.error);
   message.channel.send("Le nouveau préfixe est `" + config.prefix + "`.");
-}
+};
