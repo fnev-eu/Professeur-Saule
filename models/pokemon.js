@@ -17,7 +17,7 @@ const PokemonSchema = new Schema({
   attack: {type: Number, min: 0},
   defense: {type: Number, min: 0},
   stamina: {type: Number, min: 0},
-  evolutions: {type: Array},
+  evolutions: [{type: Schema.ObjectId, ref: "Pokemon"}],
   evolution_cost: {type: Number, min: 1},
   _evolution_candy: {type: Schema.ObjectId, ref: "Pokemon" },
   hatches_from: {type: Number},
