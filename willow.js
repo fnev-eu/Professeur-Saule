@@ -21,7 +21,7 @@ client.on("message", (message) => {
     let commandFile = require(`./commands/${command}.js`);
     commandFile.run(client, message, args);
   } catch (err) {
-    console.log(err);
+    message.channel.send(":warning: La commande `" + config.prefix + command + "` n'existe pas.");
   }
 });
 
