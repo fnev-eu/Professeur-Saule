@@ -18,6 +18,7 @@ exports.run = (client, message, args) => {
       ]
     })
     .populate("_evolution_candy")
+    .populate("evolutions")
     .exec(function(err, pokemon) {
       if (err) return console.error(err);
       if (null === pokemon) return message.channel.send(
@@ -47,24 +48,37 @@ exports.run = (client, message, args) => {
         });
       }
 
-      // "**EVOLUTION**: CHARMANDER -> CHARMELEON -> CHARIZARD \n" +
+      if (pokemon.evolutions.length) {
+        informations += "\n\n**EVOLUTION** : ";
+
+        pokemon.evolutions.forEach(function (evolution, key) {
+          informations += evolution.local_name.toUpperCase();
+          if (pokemon.evolutions.length - 1 !== key) {
+            informations += " > ";
+          }
+        });
+      }
 
       if (pokemon.description) {
-        informations += "\n```" + pokemon.description + "```";
+        informations += "\n\n```" + pokemon.description + "```";
       }
 
-      informations += "-------\n";
+      informations += "\n\n";
 
-      if (pokemon.evolution_cost) {
-        let candy = pokemon;
-        if (pokemon._evolution_candy) {
-          candy = pokemon._evolution_candy;
+      if (pokemon.evolution_cost || pokemon.hatches_from) {
+        if (pokemon.evolution_cost) {
+          let candy = pokemon;
+          if (pokemon._evolution_candy) {
+            candy = pokemon._evolution_candy;
+          }
+          informations += "Coût d'évolution : `" + pokemon.evolution_cost + " bonbons " + candy.local_name + "` \n";
         }
-        informations += "Coût d'évolution : `" + pokemon.evolution_cost + " bonbons " + candy.name + "` \n";
-      }
 
-      if (pokemon.hatches_from) {
-        informations += "Eclos d'un oeuf `" + pokemon.hatches_from + "km`\n";
+        if (pokemon.hatches_from) {
+          informations += "Eclos d'un oeuf `" + pokemon.hatches_from + "km`\n";
+        }
+
+        informations += "\n\n";
       }
 
       if (pokemon.max_cp && pokemon.max_cp_20 && pokemon.max_cp_30) {
